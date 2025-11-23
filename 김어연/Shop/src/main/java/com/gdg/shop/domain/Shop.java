@@ -36,10 +36,9 @@ public class Shop {
         this.user = user;
     }
 
-    public Shop update(String productName, Integer price, Integer quantity) {
+    public void update(String productName, Integer price, Integer quantity) {
         this.productName = productName;
         this.price = price;
         this.quantity = quantity;
-        return this;
     }
 }
