@@ -27,9 +27,9 @@ public class ShopService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         Shop shop = Shop.builder()
-                .productName(dto.getProductName())
-                .price(dto.getPrice())
-                .quantity(dto.getQuantity())
+                .productName(dto.productName())
+                .price(dto.price())
+                .quantity(dto.quantity())
                 .user(user)
                 .build();
 
@@ -54,7 +54,7 @@ public class ShopService {
             throw new SecurityException("본인 Shop만 수정할 수 있습니다.");
         }
 
-        shop.update(dto.getProductName(), dto.getPrice(), dto.getQuantity());
+        shop.update(dto.productName(), dto.price(), dto.quantity());
 
         return new ShopInfoResponseDto(shop);
     }

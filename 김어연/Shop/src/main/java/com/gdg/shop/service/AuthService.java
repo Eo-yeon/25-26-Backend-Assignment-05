@@ -52,7 +52,7 @@ public class AuthService {
         ResponseEntity<GoogleTokenResponse> response =
                 restTemplate.postForEntity(url, request, GoogleTokenResponse.class);
 
-        return response.getBody().getAccessToken();
+        return response.getBody().accessToken();
     }
 
     public UserLoginResponseDto loginOrSignUp(String googleAccessToken) {
@@ -81,32 +81,32 @@ public class AuthService {
     }
 
     private User findOrCreateUser(UserInfoDto googleUser) {
-        return userRepository.findByEmail(googleUser.getEmail())
+        return userRepository.findByEmail(googleUser.email())
                 .orElseGet(() -> createNewUser(googleUser));
     }
 
     private User createNewUser(UserInfoDto googleUser) {
         User user = User.builder()
-                .email(googleUser.getEmail())
+                .email(googleUser.email())
                 .password(null)
-                .username(googleUser.getName())
+                .username(googleUser.name())
                 .role(Role.ROLE_USER)
                 .provider("google")
-                .providerId(googleUser.getId())
-                .pictureUrl(googleUser.getPicture())
+                .providerId(googleUser.id())
+                .pictureUrl(googleUser.picture())
                 .build();
 
         return userRepository.save(user);
     }
 
     private UserLoginResponseDto buildResponse(User user, String jwt) {
-        return UserLoginResponseDto.builder()
-                .id(user.getId())
-                .name(user.getUsername())
-                .email(user.getEmail())
-                .provider(user.getProvider())
-                .pictureUrl(user.getPictureUrl())
-                .accessToken(jwt)
-                .build();
+        return new UserLoginResponseDto(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getProvider(),
+                user.getPictureUrl(),
+                jwt
+        );
     }
 }

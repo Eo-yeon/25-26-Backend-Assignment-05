@@ -20,11 +20,12 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
 
-        return UserInfoResponseDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .username(user.getUsername())
-                .role(user.getRole())
-                .build();
+        return new UserInfoResponseDto(
+                user.getId(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getUsername(),
+                user.getRole()
+        );
     }
 }

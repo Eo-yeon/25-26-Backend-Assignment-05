@@ -23,7 +23,7 @@ public class ShopController {
             @RequestBody ShopRequestDto shopRequestDto
     ) {
         ShopInfoResponseDto responseDto = shopService.addShop(
-                shopRequestDto.getUserId(),
+                shopRequestDto.userId(),
                 shopRequestDto
         );
 
