@@ -34,7 +34,7 @@ public class ShopController {
     public ResponseEntity<List<ShopInfoResponseDto>> getShopsByUser(
             Principal principal
     ) {
-        Long userId = Long.valueOf(principal.getName());
+        long userId = Long.parseLong(principal.getName());
         List<ShopInfoResponseDto> shops = shopService.getShopByUserId(userId);
         return ResponseEntity.ok(shops);
     }
