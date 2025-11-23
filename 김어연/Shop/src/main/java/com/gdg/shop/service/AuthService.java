@@ -56,50 +56,50 @@ public class AuthService {
     }
 
     public UserLoginResponseDto loginOrSignUp(String googleAccessToken) {
+        UserInfoDto googleUser = fetchGoogleUser(googleAccessToken);
+        User user = findOrCreateUser(googleUser);
+        String jwt = tokenProvider.createToken(user);
+        return buildResponse(user, jwt);
+    }
 
-        String userInfoUrl = "https://www.googleapis.com/oauth2/v2/userinfo";
+    private UserInfoDto fetchGoogleUser(String accessToken) {
+        String url = "https://www.googleapis.com/oauth2/v2/userinfo";
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(googleAccessToken);
+        headers.setBearerAuth(accessToken);
 
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
         ResponseEntity<UserInfoDto> response = restTemplate.exchange(
-                userInfoUrl,
+                url,
                 HttpMethod.GET,
                 request,
                 UserInfoDto.class
         );
 
-        UserInfoDto googleUser = response.getBody();
+        return response.getBody();
+    }
 
-        String email = googleUser.getEmail();
-        String username = googleUser.getName();
-        String pictureUrl = googleUser.getPicture();
-        String providerId = googleUser.getId();
+    private User findOrCreateUser(UserInfoDto googleUser) {
+        return userRepository.findByEmail(googleUser.getEmail())
+                .orElseGet(() -> createNewUser(googleUser));
+    }
 
-        Optional<User> optionalUser = userRepository.findByEmail(email);
+    private User createNewUser(UserInfoDto googleUser) {
+        User user = User.builder()
+                .email(googleUser.getEmail())
+                .password(null)
+                .username(googleUser.getName())
+                .role(Role.ROLE_USER)
+                .provider("google")
+                .providerId(googleUser.getId())
+                .pictureUrl(googleUser.getPicture())
+                .build();
 
-        User user;
+        return userRepository.save(user);
+    }
 
-        if (optionalUser.isPresent()) {
-            user = optionalUser.get();
-        } else {
-            user = User.builder()
-                    .email(email)
-                    .password(null)
-                    .username(username)
-                    .role(Role.ROLE_USER)
-                    .provider("google")
-                    .providerId(providerId)
-                    .pictureUrl(pictureUrl)
-                    .build();
-
-            userRepository.save(user);
-        }
-
-        String jwt = tokenProvider.createToken(user);
-
+    private UserLoginResponseDto buildResponse(User user, String jwt) {
         return UserLoginResponseDto.builder()
                 .id(user.getId())
                 .name(user.getUsername())
